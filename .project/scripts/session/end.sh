@@ -97,21 +97,28 @@ fi
 # Create detailed instructions file
 INSTRUCTIONS_FILE="tmp/session-end-instructions-$(date +%Y%m%d-%H%M%S).md"
 
-awk -v dev="$DEVELOPER" \
-    -v date="$DATE" \
-    -v session="$SESSION_NUM" \
-    -v checkpoint="$CHECKPOINT_FILE" \
-    -v commits="$GIT_COMMITS_SECTION" \
-    -v changes="$GIT_CHANGES_SECTION" \
-    '{
-        gsub(/{DEVELOPER}/, dev);
-        gsub(/{DATE}/, date);
-        gsub(/{SESSION_NUM}/, session);
-        gsub(/{CHECKPOINT_FILE}/, checkpoint);
-        gsub(/{GIT_COMMITS}/, commits);
-        gsub(/{GIT_CHANGES}/, changes);
+# Export variables for perl to access via environment
+export DEVELOPER DATE SESSION_NUM CHECKPOINT_FILE GIT_COMMITS_SECTION GIT_CHANGES_SECTION
+
+# Use perl for variable substitution (handles multi-line content properly on all platforms)
+perl -e "
+    my \$developer = \$ENV{DEVELOPER} // '';
+    my \$date = \$ENV{DATE} // '';
+    my \$session = \$ENV{SESSION_NUM} // '';
+    my \$checkpoint = \$ENV{CHECKPOINT_FILE} // '';
+    my \$commits = \$ENV{GIT_COMMITS_SECTION} // '';
+    my \$changes = \$ENV{GIT_CHANGES_SECTION} // '';
+
+    while (<>) {
+        s/\{DEVELOPER\}/\$developer/g;
+        s/\{DATE\}/\$date/g;
+        s/\{SESSION_NUM\}/\$session/g;
+        s/\{CHECKPOINT_FILE\}/\$checkpoint/g;
+        s/\{GIT_COMMITS\}/\$commits/g;
+        s/\{GIT_CHANGES\}/\$changes/g;
         print;
-    }' "$TEMPLATE_FILE" > "$INSTRUCTIONS_FILE"
+    }
+" "$TEMPLATE_FILE" > "$INSTRUCTIONS_FILE"
 
 # Create short prompt file that references the instructions
 cat > "$TMP_PROMPT_FILE" << EOF
