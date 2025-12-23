@@ -1,0 +1,14 @@
+# Git attributes for template repository
+#
+# Structure:
+#   - bootstrap.sh          Entry point (kept)
+#   - .template/            All template infrastructure (kept)
+#     - docs/               Template documentation
+#     - examples/           Reference examples
+#     - config/             Version defaults
+#     - scripts/            Template scripts
+#     - configs/            Language config templates
+#     - .devcontainer/      Devcontainer templates
+#     - ...
+#
+# Users can re-run bootstrap.sh anytime to add languages or change settings.
